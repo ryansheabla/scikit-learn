@@ -2331,6 +2331,24 @@ def _check_method_params(X, params, indices=None):
     return method_params_validated
 
 
+def _is_narwhals_df_or_series(X):
+    """Return True if the X is a narwhals dataframe or series."""
+    try:
+        nw = sys.modules["narwhals"]
+    except KeyError:
+        return False
+    return isinstance(X, (nw.DataFrame, nw.Series))
+
+
+def _is_narwhals_df(X):
+    """Return True if the X is a narwhals dataframe."""
+    try:
+        nw = sys.modules["narwhals"]
+    except KeyError:
+        return False
+    return isinstance(X, nw.DataFrame)
+
+
 def _is_pandas_df_or_series(X):
     """Return True if the X is a pandas dataframe or series."""
     try:
@@ -2402,6 +2420,8 @@ def _get_feature_names(X):
         # that could fail with other libraries. Note: in the longer term, we
         # could decide to instead rely on the __dataframe_namespace__ API once
         # adopted by our minimally supported pandas version.
+        feature_names = np.asarray(X.columns, dtype=object)
+    elif _is_narwhals_df(X):
         feature_names = np.asarray(X.columns, dtype=object)
     elif hasattr(X, "__dataframe__"):
         df_protocol = X.__dataframe__()
